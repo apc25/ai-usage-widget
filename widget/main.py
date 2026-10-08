@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import time
+import traceback
 from pathlib import Path
 
 from PySide6.QtCore import QLockFile, QPoint, QRect, QRectF, Qt, QTimer
@@ -15,6 +16,7 @@ import winapi
 DATA_DIR = Path(os.environ["LOCALAPPDATA"]) / "AIUsageWidget"
 USAGE_FILE = DATA_DIR / "usage.json"
 SETTINGS_FILE = DATA_DIR / "settings.json"
+LOG_FILE = DATA_DIR / "widget.log"
 
 STALE_MS = 15 * 60 * 1000
 REFRESH_COOLDOWN_S = 30
@@ -87,7 +89,7 @@ class UsageWidget(QWidget):
         self.settings = load_settings()
         self.usage, self.usage_mtime = None, None
         self.connected = False
-        self.last_refresh = float("-inf")
+        self.last_refresh = time.monotonic() - REFRESH_COOLDOWN_S
         self.light = winapi.light_theme()
         self.tray, self.tray_window = None, None
         self.labels, self.rings = [], []
@@ -340,7 +342,9 @@ class UsageWidget(QWidget):
         labels.triggered.connect(lambda checked: self.set_setting("labels", checked))
         menu.addAction("위치 초기화", lambda: self.set_setting("x", DEFAULTS["x"]))
         menu.addSeparator()
-        menu.addAction("종료", QApplication.quit)
+        # quit() first tries to close every QWindow, including the foreign taskbar
+        # wrapper, which refuses and cancels the quit; exit() just stops the loop.
+        menu.addAction("종료", lambda: QApplication.exit(0))
         menu.exec(QPoint(e.globalPos().x(), self.taskbar_top() - menu.sizeHint().height()))
         save_settings(self.settings)
 
@@ -385,9 +389,17 @@ class UsageWidget(QWidget):
         self.update()
 
 
+def log_exception(exc_type, exc, tb):
+    # pythonw has no console, so uncaught errors (e.g. in Qt event handlers) would vanish.
+    with LOG_FILE.open("a", encoding="utf-8") as log:
+        log.write(time.strftime("%Y-%m-%d %H:%M:%S\n") + "".join(traceback.format_exception(exc_type, exc, tb)) + "\n")
+    sys.__excepthook__(exc_type, exc, tb)
+
+
 def main():
     app = QApplication(sys.argv)
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+    sys.excepthook = log_exception
     lock = QLockFile(str(DATA_DIR / "widget.lock"))
     if not lock.tryLock(100):
         return  # another instance is already running
