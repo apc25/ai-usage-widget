@@ -50,6 +50,18 @@ dev/              개발용 가짜 데이터
 ```
 위젯은 전달 프로그램이 실행 중인지(= Chrome 확장이 연결돼 있는지)를 이름 있는 Windows 이벤트 `Local\AIUsageWidget.Refresh`의 존재로 판단한다. 연결이 없으면 원을 흐리게 표시하고, 새로고침 메뉴를 막는다. 새로고침은 30초에 한 번까지만 된다.
 
+## 문제 해결: 위젯에 "Chrome 연결 안 됨"
+원이 흐리고 툴팁에 "Chrome 연결 안 됨"이 뜨면, 아래를 위에서부터 확인한다.
+1. **Chrome이 꺼져 있음** → Chrome을 켜면 확장이 시작되면서 바로 연결된다.
+2. **확장 코드(`manifest.json`, `background.js`)를 바꾼 뒤** → 확장이 옛 코드로 돌고 있다.
+   `chrome://extensions`에서 🔄를 누르고, 그래도 안 되면 확장을 **삭제한 뒤 압축해제 확장으로 다시 로드**한다.
+   🔄로는 반영이 안 되고 삭제 후 다시 로드해서 해결된 경우가 실제로 두 번 있었다.
+   자세한 순서는 AI-Usage-Monitor 저장소의 `docs/TROUBLESHOOTING.md` → "🔄 로 반영이 안 될 때".
+3. **확장 ID가 바뀜** (다른 폴더에서 로드, 다른 컴퓨터) → `install.ps1`을 다시 실행한다. 같은 폴더를 다시 로드하면 ID는 그대로다.
+4. 그래도 안 되면 `%LOCALAPPDATA%\AIUsageWidget\host.log`에 전달 프로그램 오류가 남았는지 본다.
+
+위젯이 `pythonw`(콘솔 없음)로 실행되기 때문에 오류가 화면에 나오지 않는다. 우클릭 메뉴가 안 뜨는 것처럼 동작이 이상하면 `%LOCALAPPDATA%\AIUsageWidget\widget.log`를 먼저 본다.
+
 ## 개발용 실행
 ```
 python dev/fake_usage.py          # 가짜 데이터 쓰기 (--stale, --error 옵션)
