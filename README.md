@@ -5,6 +5,12 @@ Windows 11 작업표시줄 왼쪽 빈 공간에 Claude / ChatGPT 사용량을 �
 사용량 데이터는 Chrome 확장 [AI Usage Monitor](https://github.com/apc25/ai-usage-monitor)가 가져온다.
 확장이 5분마다 가져온 결과를 사이드 패널과 이 위젯에 동시에 넘긴다. 사이트 호출은 한 번이다.
 
+![작업표시줄 왼쪽에 붙은 위젯](docs/images/widget-taskbar.png)
+
+<img src="docs/images/widget-closeup.png" alt="위젯 확대" width="480">
+
+숫자는 예시 값이다. 원은 왼쪽부터 Claude 5시간·7일·7일 model-scoped(모델명은 API가 주는 이름), ChatGPT 5시간·7일이다.
+
 ## 표시
 - Claude: 5h / 7d / 7d model-scoped(API가 주는 모델명) · ChatGPT: 5h / 7d
 - 원 안 숫자는 사용률(%). 색: 70% 미만 초록, 70~90% 노랑, 90% 이상 빨강
@@ -75,6 +81,7 @@ host/host.py      Chrome이 실행하는 전달 프로그램. 확장 → usage.j
 widget/main.py    위젯 화면
 widget/winapi.py  작업표시줄 핸들, 테마, 전달 프로그램 연결 확인·새로고침 요청
 dev/              개발용 가짜 데이터
+docs/images/      README 화면 이미지 (예시 값)
 ```
 위젯은 전달 프로그램이 실행 중인지(= Chrome 확장이 연결돼 있는지)를 이름 있는 Windows 이벤트 `Local\AIUsageWidget.Refresh`의 존재로 판단한다. 연결이 없으면 원을 흐리게 표시하고, 새로고침 메뉴를 막는다. 새로고침은 30초에 한 번까지만 된다.
 
