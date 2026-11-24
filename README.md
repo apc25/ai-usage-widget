@@ -67,3 +67,10 @@ dev/              개발용 가짜 데이터
 python dev/fake_usage.py          # 가짜 데이터 쓰기 (--stale, --error 옵션)
 python widget/main.py
 ```
+
+## License
+MIT License — [LICENSE](LICENSE)
+
+Copyright (c) 2026 apc25
+
+저장소 전체(코드, 문서)에 적용된다. 제3자 자료는 포함돼 있지 않다. 실행에 필요한 PySide6는 저장소에 포함되지 않고 사용자가 따로 설치한다.
